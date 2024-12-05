@@ -24,7 +24,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,         KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,           KC_J,           KC_L,           KC_U,           KC_Y,           KC_QUOTE,       KC_BSPC,
     KC_MINUS,       KC_A,           KC_R,           KC_S,           KC_T,           KC_G,           KC_M,           KC_N,           KC_E,           KC_I,           KC_O,           KC_SCLN,
     KC_LEFT_SHIFT,  KC_Z,           KC_X,           KC_C,           KC_D,           KC_V,           KC_K,           KC_H,           KC_COMMA,       KC_DOT,         KC_SLASH,       MO(_ARROW),
-    KC_ESCAPE,      TO(_GAME),      KC_LEFT_ALT,    KC_LEFT_CTRL,   OSL(_SYMBOL),   KC_SPACE,       KC_SPACE,       OSL(_NUMPAD),   KC_LEFT_GUI,    ST_MACRO_0,     ST_MACRO_1,     KC_ENTER
+    KC_ESCAPE,      TO(_GAME),      KC_LEFT_GUI,    KC_LEFT_CTRL,   OSL(_SYMBOL),   KC_SPACE,       KC_SPACE,       OSL(_NUMPAD),   KC_LEFT_ALT,    ST_MACRO_0,     ST_MACRO_1,     KC_ENTER
   ),
 
   [_SYMBOL] = LAYOUT_ortho_4x12(
@@ -101,4 +101,43 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
+void keyboard_post_init_user(void) {
+  rgb_matrix_mode_noeeprom(0);
+  rgb_matrix_enable_noeeprom();
+  rgb_matrix_set_color_all(0, 0, 0);
+}
 
+bool rgb_matrix_indicators_user(void) {
+  rgb_matrix_set_color_all(0, 0, 0);
+  uint8_t index = 0;
+  switch (get_highest_layer(layer_state)) {
+    case _SYMBOL:
+      index = g_led_config.matrix_co[1][3];
+      break;
+    case _NUMPAD:
+      index = g_led_config.matrix_co[6][1];
+      break;
+    case _CONTROL:
+      index = g_led_config.matrix_co[2][3];
+      break;
+    case _GAME:
+      index = g_led_config.matrix_co[1][5];
+      break;
+    case _ARROW:
+      index = g_led_config.matrix_co[1][1];
+      break;
+    case _MOUSE:
+      index = g_led_config.matrix_co[6][0];
+      break;
+    case _FUNCTION:
+      index = g_led_config.matrix_co[0][3];
+      break;
+    case _WINDOW:
+      index = g_led_config.matrix_co[0][2];
+      break;
+    default:
+      return true;
+  }
+  rgb_matrix_set_color(index, 0xff, 0xff, 0xff);
+  return true;
+}
