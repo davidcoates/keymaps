@@ -103,10 +103,10 @@ void keyboard_post_init_user(void) {
 const uint8_t PROGMEM ledmap[][RGB_MATRIX_LED_COUNT][3] = {
 
     [_BASE] = {
-      {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255},
-      {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255},
-      {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255},
-      {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255},            {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}, {0,0,255}
+      {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+      {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+      {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},
+      {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0},          {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}
     },
 
     [_SYMBOL] = {
@@ -228,15 +228,36 @@ bool rgb_matrix_indicators_user(void) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case ST_MACRO_0:
-    if (record->event.pressed) {
-      SEND_STRING(SS_LALT(SS_LCTL(SS_TAP(X_LEFT))));
-    }
-    break;
+      if (record->event.pressed) {
+        SEND_STRING(SS_LALT(SS_LCTL(SS_TAP(X_LEFT))));
+      }
+      break;
     case ST_MACRO_1:
+      if (record->event.pressed) {
+        SEND_STRING(SS_LALT(SS_LCTL(SS_TAP(X_RIGHT))));
+      }
+      break;
+
+  }
+  static int one_shot_layer = -1;
+  if ((keycode & QK_ONE_SHOT_LAYER) == QK_ONE_SHOT_LAYER) {
     if (record->event.pressed) {
-      SEND_STRING(SS_LALT(SS_LCTL(SS_TAP(X_RIGHT))));
+      one_shot_layer = QK_ONE_SHOT_LAYER_GET_LAYER(keycode);
     }
-    break;
+  } else if (one_shot_layer != -1) {
+    bool delay_unregister = IS_QK_BASIC(keycode) || IS_QK_MODS(keycode);
+    if (record->event.pressed) {
+      if (delay_unregister) {
+        register_code16(keycode);
+        return false;
+      }
+    } else {
+      one_shot_layer = -1;
+      if (delay_unregister) {
+        unregister_code16(keycode);
+        return false;
+      }
+    }
   }
   return true;
 }

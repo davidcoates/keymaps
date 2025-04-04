@@ -98,6 +98,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
     break;
   }
+  static int one_shot_layer = -1;
+  if ((keycode & QK_ONE_SHOT_LAYER) == QK_ONE_SHOT_LAYER) {
+    if (record->event.pressed) {
+      one_shot_layer = QK_ONE_SHOT_LAYER_GET_LAYER(keycode);
+    }
+  } else if (one_shot_layer != -1) {
+    bool delay_unregister = IS_QK_BASIC(keycode) || IS_QK_MODS(keycode);
+    if (record->event.pressed) {
+      if (delay_unregister) {
+        register_code16(keycode);
+        return false;
+      }
+    } else {
+      one_shot_layer = -1;
+      if (delay_unregister) {
+        unregister_code16(keycode);
+        return false;
+      }
+    }
+  }
   return true;
 }
 
