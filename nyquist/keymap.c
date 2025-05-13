@@ -129,35 +129,49 @@ void keyboard_post_init_user(void) {
 
 bool rgb_matrix_indicators_user(void) {
   rgb_matrix_set_color_all(0, 0, 0);
-  uint8_t index = 0;
+  uint8_t row = 0;
+  uint8_t col = 0;
   switch (get_highest_layer(layer_state)) {
     case _SYMBOL:
-      index = g_led_config.matrix_co[1][3];
+      row = 1;
+      col = 3;
       break;
     case _NUMPAD:
-      index = g_led_config.matrix_co[6][1];
+      row = 6;
+      col = 1;
       break;
     case _CONTROL:
-      index = g_led_config.matrix_co[2][3];
+      row = 2;
+      col = 3;
       break;
     case _GAME:
-      index = g_led_config.matrix_co[1][5];
+      row = 1;
+      col = 5;
       break;
     case _ARROW:
-      index = g_led_config.matrix_co[1][1];
+      row = 1;
+      col = 1;
       break;
     case _MOUSE:
-      index = g_led_config.matrix_co[6][0];
+      row = 6;
+      col = 0;
       break;
     case _FUNCTION:
-      index = g_led_config.matrix_co[0][3];
+      row = 0;
+      col = 3;
       break;
     case _WINDOW:
-      index = g_led_config.matrix_co[0][2];
+      row = 0;
+      col = 2;
       break;
     default:
       return true;
   }
-  rgb_matrix_set_color(index, 0xff, 0xff, 0xff);
+  uint8_t index = g_led_config.matrix_co[row][col];
+  static const uint8_t rgb_matrix_split[2] = RGB_MATRIX_SPLIT;
+  if (is_keyboard_left() == (index < rgb_matrix_split[0])) // TODO: figure out why this is needed...
+  {
+    rgb_matrix_set_color(index, 0xff, 0xff, 0xff);
+  }
   return true;
 }
