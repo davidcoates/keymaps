@@ -7,10 +7,67 @@ enum planck_keycodes {
 
 #define KC_SCR_SHOT LCTL(LSFT(KC_PSCR))
 
+void keyboard_post_init_user(void) {
+  set_unicode_input_mode(UNICODE_MODE_LINUX);
+  rgb_matrix_mode_noeeprom(0);
+  rgb_matrix_enable_noeeprom();
+  rgb_matrix_set_color_all(0, 0, 0);
+}
+
+enum unicode_names {
+  SUP_0,
+  SUP_1,
+  SUP_2,
+  SUP_3,
+  SUP_4,
+  SUP_5,
+  SUP_6,
+  SUP_7,
+  SUP_8,
+  SUP_9,
+  SUP_MINUS,
+  SUB_0,
+  SUB_1,
+  SUB_2,
+  SUB_3,
+  SUB_4,
+  SUB_5,
+  SUB_6,
+  SUB_7,
+  SUB_8,
+  SUB_9,
+};
+
+const uint32_t unicode_map[] PROGMEM = {
+  [SUP_0]     = 0x2070, // ⁰
+  [SUP_1]     = 0x00B9, // ¹
+  [SUP_2]     = 0x00B2, // ²
+  [SUP_3]     = 0x00B3, // ³
+  [SUP_4]     = 0x2074, // ⁴
+  [SUP_5]     = 0x2075, // ⁵
+  [SUP_6]     = 0x2076, // ⁶
+  [SUP_7]     = 0x2077, // ⁷
+  [SUP_8]     = 0x2078, // ⁸
+  [SUP_9]     = 0x2079, // ⁹
+  [SUP_MINUS] = 0x207B, // ⁻
+  [SUB_0]     = 0x2080, // ₀
+  [SUB_1]     = 0x2081, // ₁
+  [SUB_2]     = 0x2082, // ₂
+  [SUB_3]     = 0x2083, // ₃
+  [SUB_4]     = 0x2084, // ₄
+  [SUB_5]     = 0x2085, // ₅
+  [SUB_6]     = 0x2086, // ₆
+  [SUB_7]     = 0x2087, // ₇
+  [SUB_8]     = 0x2088, // ₈
+  [SUB_9]     = 0x2089, // ₉
+};
+
 enum planck_layers {
   _BASE,
   _SYMBOL,
   _NUMPAD,
+  _SUB,
+  _SUP,
   _CONTROL,
   _GAME,
   _ARROW,
@@ -35,10 +92,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [_NUMPAD] = LAYOUT_ortho_4x12(
-    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_7,           KC_8,           KC_9,           KC_0,           KC_TRANSPARENT,
-    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_4,           KC_5,           KC_6,           KC_0,           KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, MO(_SUP),       KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_7,           KC_8,           KC_9,           KC_0,           KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, MO(_SUB),       KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_4,           KC_5,           KC_6,           KC_0,           KC_TRANSPARENT,
     KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_1,           KC_2,           KC_3,           KC_DOT,         MO(_FUNCTION),
     KC_TRANSPARENT, TO(_BASE),      KC_TRANSPARENT, KC_TRANSPARENT, MO(_CONTROL),   KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT
+  ),
+
+  [_SUB] = LAYOUT_ortho_4x12(
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, UC(SUB_7),      UC(SUB_8),      UC(SUB_9),      UC(SUB_0),      KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, UC(SUB_4),      UC(SUB_5),      UC(SUB_6),      UC(SUB_0),      KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, UC(SUB_1),      UC(SUB_2),      UC(SUB_3),      KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_TRANSPARENT, TO(_BASE),      KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT
+  ),
+
+  [_SUP] = LAYOUT_ortho_4x12(
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, UC(SUP_7),      UC(SUP_8),      UC(SUP_9),      UC(SUP_0),      KC_TRANSPARENT,
+    UC(SUP_MINUS),  KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, UC(SUP_4),      UC(SUP_5),      UC(SUP_6),      UC(SUP_0),      KC_TRANSPARENT,
+    KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, UC(SUP_1),      UC(SUP_2),      UC(SUP_3),      KC_TRANSPARENT, KC_TRANSPARENT,
+    KC_TRANSPARENT, TO(_BASE),      KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT, KC_TRANSPARENT
   ),
 
   [_CONTROL] = LAYOUT_ortho_4x12(
@@ -121,12 +192,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
-void keyboard_post_init_user(void) {
-  rgb_matrix_mode_noeeprom(0);
-  rgb_matrix_enable_noeeprom();
-  rgb_matrix_set_color_all(0, 0, 0);
-}
-
 bool rgb_matrix_indicators_user(void) {
   rgb_matrix_set_color_all(0, 0, 0);
   uint8_t row = 0;
@@ -141,6 +206,8 @@ bool rgb_matrix_indicators_user(void) {
       col = 1;
       break;
     case _CONTROL:
+    case _SUB:
+    case _SUP:
       row = 2;
       col = 3;
       break;
