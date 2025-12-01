@@ -9,8 +9,9 @@ enum planck_keycodes {
 
 void keyboard_post_init_user(void) {
   set_unicode_input_mode(UNICODE_MODE_LINUX);
-  rgb_matrix_mode_noeeprom(0);
-  rgb_matrix_enable_noeeprom();
+  rgb_matrix_mode(0);
+  rgb_matrix_sethsv(0, 0, 0);
+  rgb_matrix_enable();
   rgb_matrix_set_color_all(0, 0, 0);
 }
 
@@ -192,53 +193,60 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
-bool rgb_matrix_indicators_user(void) {
-  rgb_matrix_set_color_all(0, 0, 0);
-  uint8_t row = 0;
-  uint8_t col = 0;
-  switch (get_highest_layer(layer_state)) {
-    case _SYMBOL:
-      row = 1;
-      col = 3;
-      break;
-    case _NUMPAD:
-      row = 6;
-      col = 1;
-      break;
-    case _CONTROL:
-    case _SUB:
-    case _SUP:
-      row = 2;
-      col = 3;
-      break;
-    case _GAME:
-      row = 1;
-      col = 5;
-      break;
-    case _ARROW:
-      row = 1;
-      col = 1;
-      break;
-    case _MOUSE:
-      row = 6;
-      col = 0;
-      break;
-    case _FUNCTION:
-      row = 0;
-      col = 3;
-      break;
-    case _WINDOW:
-      row = 0;
-      col = 2;
-      break;
-    default:
-      return true;
-  }
+void highlight_key(uint8_t row, uint8_t col)
+{
   uint8_t index = g_led_config.matrix_co[row][col];
   static const uint8_t rgb_matrix_split[2] = RGB_MATRIX_SPLIT;
   if (is_keyboard_left() == (index < rgb_matrix_split[0])) // TODO: figure out why this is needed...
   {
     rgb_matrix_set_color(index, 0xff, 0xff, 0xff);
   }
+}
+
+bool rgb_matrix_indicators_user(void) {
+
+  static int last_layer = -1;
+  int layer = get_highest_layer(layer_state);
+  if (last_layer != layer)
+  {
+    rgb_matrix_set_color_all(0, 0, 0);
+  }
+  last_layer = layer;
+
+  switch (layer) {
+    case _SYMBOL:
+      highlight_key(1, 3);
+      break;
+    case _NUMPAD:
+      highlight_key(6, 1);
+      break;
+    case _SUB:
+      highlight_key(6, 1);
+      highlight_key(1, 3);
+      break;
+    case _SUP:
+      highlight_key(6, 1);
+      highlight_key(0, 3);
+      break;
+    case _CONTROL:
+      highlight_key(2, 3);
+      break;
+    case _GAME:
+      highlight_key(1, 5);
+      break;
+    case _ARROW:
+      highlight_key(1, 1);
+      break;
+    case _MOUSE:
+      highlight_key(6, 0);
+      break;
+    case _FUNCTION:
+      highlight_key(0, 3);
+      break;
+    case _WINDOW:
+      highlight_key(0, 2);
+      break;
+  }
+
   return true;
 }
